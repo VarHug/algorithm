@@ -3,8 +3,11 @@
  * @param {num[]} arr 
  */
 function bubble_sort(arr) {
-  let temp,
-    len = arr.length;
+  if (arr.length <= 1) {
+    return;
+  }
+  let temp;
+  let len = arr.length;
   for (let i = 0; i < len; i++) {
     for (let j = 0; j < len - 1 - i; j++) {
       if (arr[j] > arr[j + 1]) {
@@ -18,8 +21,11 @@ function bubble_sort(arr) {
 }
 
 Array.prototype.bubble_sort = function () {
-  let temp,
-    len = this.length;
+  if (arr.length <= 1) {
+    return;
+  }
+  let temp;
+  let len = this.length;
   for (let i = 0; i < len; i++) {
     for (let j = 0; j < len - 1 - i; j++) {
       if (this[j] > this[j + 1]) {
