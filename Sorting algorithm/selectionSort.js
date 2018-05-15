@@ -40,4 +40,4 @@ Array.prototype.selection_sort = function () {
     this[min] = temp;
   }
   return this;
-}
+};

@@ -36,4 +36,4 @@ Array.prototype.bubble_sort = function () {
     }
   }
   return this;
-}
+};
