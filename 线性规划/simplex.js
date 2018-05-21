@@ -1,6 +1,6 @@
 /**
  * 单纯形算法
- * @param {num[][]} matrix 单纯形表(默认C行为最底行,B为最右列)
+ * @param {num[][]} matrix 单纯形表(默认检验数行为最底行,B为最右列)
  * @returns {num}
  */
 function simplex(matrix) {
@@ -13,22 +13,50 @@ function simplex(matrix) {
   let y = 0;
   let maxc = INT_MIN;
   let minb = INT_MAX;
+  let xe = []; // 非基变量
+  let xl = []; // 基变量
+  let res;
 
   if (m < 1 || n < 1) {
     return;
   }
 
+  _init(matrix);
+
   while (1) {
-    findC(matrix);
+    _findC(matrix);
     if (maxc <= 0) {
-      return matrix[m - 1][n - 1];
+      if (_check(matrix)) {
+        res = '有无穷多解';
+      } else {
+        res = matrix[m - 1][n - 1];
+      }
+      break;
     }
-    check(matrix);
-    transformation(matrix);
+    _findB(matrix);
+    if (minb === INT_MAX) {
+      res = '无界解';
+      break;
+    }
+    _pivot();
+    _transformation(matrix);
   }
-  
+
+  return res;
+
+  // 初始化轴/非轴元素
+  function _init(matrix) {
+    for (let i = 0; i < n - 1; i++) {
+      if (matrix[m - 1][i]) {
+        xe.push(i);
+      } else {
+        xl.push(i);
+      }
+    }
+  }
+
   // 在非轴元素中寻找最大的C
-  function findC(matrix) {
+  function _findC(matrix) {
     maxc = INT_MIN;
     for (let i = 0; i < n - 1; i++) {
       if (matrix[m - 1][i] > maxc) {
@@ -38,12 +66,12 @@ function simplex(matrix) {
     }
   }
 
-  // 计算检验数
-  function check(matrix) {
+  // 计算minb
+  function _findB(matrix) {
     minb = INT_MAX;
     let tmp;
     for (let i = 0; i < m - 1; i++) {
-      if (matrix[i][y] !== 0) {
+      if (matrix[i][y] > 0) {
         tmp = matrix[i][n - 1] / matrix[i][y];
         if (tmp < minb) {
           minb = tmp;
@@ -52,8 +80,14 @@ function simplex(matrix) {
       }
     }
   }
+
+  // 转轴
+  function _pivot(matrix) {
+    xe[y] = [xl[x], xl[x] = xe[y]][0];
+  }
+
   // 行变换
-  function transformation(matrix) {
+  function _transformation(matrix) {
     let divisor = matrix[x][y];
     // 主行归一化
     for (let i = 0; i < n; i++) {
@@ -72,7 +106,18 @@ function simplex(matrix) {
       }
     }
   }
+
+  // 检验是否有无穷多解
+  function _check(matrix) {
+    for (let i = 0; i < xe.length; i++) {
+      if (!matrix[m - 1][xe[i]]) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
+
 // minz = -x1 - x2
 // s.t. = {
     // 2x1 +  x2 + x3 = 12
@@ -100,4 +145,31 @@ var demo = [
   [0, 0, 1, 0, 0, 1, 0, 3],
   [0, 3, 1, 0, 0, 0, 1, 6],
   [1, 14, 6, 0, 0, 0, 0, 0]
+];
+
+// maxz = x1 +x 2
+// s.t. = {
+    // x1 - x2 + x3 = 1
+    // -3x1 + 2x2 + x4 = 6
+    // xi >= 0 (i = 1, 2, 3, 4)
+//}
+// 无界解
+var demo = [
+  [1, -1, 1, 0, 1],
+  [-3, 2, 0, 1, 6],
+  [1, 1, 0, 0, 0]
+];
+
+// maxz = 50x1 + 50x2
+// s.t. = {
+    // x1 + x2 + x3 = 300
+    // 2x1 + x2 + x4 = 400
+    // x2 + x5 = 250
+    // xi >= 0 (i = 1, 2, 3, 4, 5)
+//} 无穷多解
+var demo = [
+  [1, 1, 1, 0, 0, 300],
+  [2, 1, 0, 1, 0, 400],
+  [0, 1, 0, 0, 1, 250],
+  [50, 50, 0, 0, 0, 0]
 ];
