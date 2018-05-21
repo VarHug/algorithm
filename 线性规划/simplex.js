@@ -4,33 +4,24 @@
  * @returns {num}
  */
 function simplex(matrix) {
-  const INT_MAX = -1 >>> 1;
-  const INT_MIN = 1 << 31;
-
-  let m = matrix.length;
-  let n = matrix[0].length;
-  let x = 0;
-  let y = 0;
-  let maxc = INT_MIN;
-  let minb = INT_MAX;
-  let xe = []; // 非基变量
-  let xl = []; // 基变量
-  let res;
-
-  if (m < 1 || n < 1) {
-    return;
-  }
-
-  _init(matrix);
-
+  const INT_MAX = -1 >>> 1, INT_MIN = 1 << 31;
+  let m = matrix.length, n = matrix[0].length, x = 0, y = 0, maxc = INT_MIN, minb = INT_MAX, xe = [], xl = [], res;
+  if (m < 1 || n < 1) return;
+  (function _init(matrix) {
+    matrix[m - 1].forEach((item, index) => {
+      if (item && index < n - 1)
+        xe.push(index);
+      else
+        xl.push(index);
+    });
+  })(matrix);
   while (1) {
     _findC(matrix);
     if (maxc <= 0) {
-      if (_check(matrix)) {
+      if (_check(matrix))
         res = '有无穷多解';
-      } else {
+      else
         res = matrix[m - 1][n - 1];
-      }
       break;
     }
     _findB(matrix);
@@ -41,31 +32,18 @@ function simplex(matrix) {
     _pivot();
     _transformation(matrix);
   }
-
   return res;
-
-  // 初始化轴/非轴元素
-  function _init(matrix) {
-    for (let i = 0; i < n - 1; i++) {
-      if (matrix[m - 1][i]) {
-        xe.push(i);
-      } else {
-        xl.push(i);
-      }
-    }
-  }
 
   // 在非轴元素中寻找最大的C
   function _findC(matrix) {
     maxc = INT_MIN;
-    for (let i = 0; i < n - 1; i++) {
-      if (matrix[m - 1][i] > maxc) {
-        maxc = matrix[m - 1][i];
-        y = i;
+    matrix[m - 1].forEach((item, index) => {
+      if (item > maxc && index < n - 1) {
+        maxc = matrix[m - 1][index];
+        y = index;
       }
-    }
+    });
   }
-
   // 计算minb
   function _findB(matrix) {
     minb = INT_MAX;
@@ -80,12 +58,10 @@ function simplex(matrix) {
       }
     }
   }
-
   // 转轴
   function _pivot(matrix) {
     xe[y] = [xl[x], xl[x] = xe[y]][0];
   }
-
   // 行变换
   function _transformation(matrix) {
     let divisor = matrix[x][y];
@@ -95,9 +71,7 @@ function simplex(matrix) {
     }
     // 高斯行变换
     for (let i = 0; i < m; i++) {
-      if (i === x) {
-        continue;
-      }
+      if (i === x) continue;
       if (matrix[i][y] !== 0) {
         let multiplier = matrix[i][y];
         for (let j = 0; j < n; j++) {
@@ -106,13 +80,10 @@ function simplex(matrix) {
       }
     }
   }
-
   // 检验是否有无穷多解
   function _check(matrix) {
     for (let i = 0; i < xe.length; i++) {
-      if (!matrix[m - 1][xe[i]]) {
-        return true;
-      }
+      if (!matrix[m - 1][xe[i]]) return true;
     }
     return false;
   }
